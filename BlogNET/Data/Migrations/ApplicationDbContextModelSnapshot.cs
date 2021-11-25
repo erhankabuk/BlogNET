@@ -98,7 +98,7 @@ namespace BlogNET.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("BlogNET.Data.Post", b =>
@@ -147,7 +147,7 @@ namespace BlogNET.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Post");
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlogNET.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211125085026_InitialCreate")]
+    [Migration("20211125093443_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,7 +100,7 @@ namespace BlogNET.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("BlogNET.Data.Post", b =>
@@ -149,7 +149,7 @@ namespace BlogNET.Data.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Post");
+                    b.ToTable("Posts");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

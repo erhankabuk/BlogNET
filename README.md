@@ -12,5 +12,6 @@
 # Useful Links
 
 * https://github.com/dotnet-architecture/eShopOnWeb
+* https://picsum.photos/id/237/200/300
 
 

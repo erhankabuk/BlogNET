@@ -12,5 +12,9 @@ namespace BlogNET.Data
             : base(options)
         {
         }
+
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Post> Posts { get; set; }
+
     }
 }
