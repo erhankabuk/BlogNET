@@ -11,8 +11,8 @@
     <div class="card-body">
         <div class="small text-muted">@post.CreatedTime</div>
         <h2 class="card-title">@post.Title</h2>
-       @Html.Raw(post.Content)
-        <a class="btn btn-primary" href="#!">Read more →</a>
+        @Html.Raw(post.Content)
+        <a class="btn btn-primary" asp-controller="Home" asp-action="ShowPost" asp-route-slug="@post.Slug">Read more →</a>
     </div>
 </div>
 }

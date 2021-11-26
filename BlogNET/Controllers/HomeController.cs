@@ -1,6 +1,7 @@
 ﻿using BlogNET.Data;
 using BlogNET.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -21,11 +22,22 @@ namespace BlogNET.Controllers
             _context = context;
         }
 
-        public IActionResult Index()
+        [Route("")]
+        [Route("c/{slug}")]        
+        public IActionResult Index(string slug)
         {
-            return View(_context.Posts.ToList());
+            IQueryable<Post> posts = _context.Posts;
+            if (!string.IsNullOrEmpty(slug))
+                posts = posts.Where(x => x.Category.Slug == slug);
+
+            return View(posts.ToList());
         }
 
+        [Route("p/{slug}")]
+        public IActionResult ShowPost(string slug)
+        {
+            return View(_context.Posts.Include(x=>x.Category).FirstOrDefault(x=>x.Slug==slug));
+        }
         public IActionResult Privacy()
         {
             return View();
