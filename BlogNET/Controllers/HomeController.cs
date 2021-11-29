@@ -15,6 +15,7 @@ namespace BlogNET.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private const int POSTS_PER_PAGE = 3;
 
         public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
@@ -23,20 +24,37 @@ namespace BlogNET.Controllers
         }
 
         [Route("")]
-        [Route("c/{slug}")]        
-        public IActionResult Index(string slug)
+        [Route("c/{slug}")]
+        public IActionResult Index(string slug, int page = 1)
         {
             IQueryable<Post> posts = _context.Posts;
             if (!string.IsNullOrEmpty(slug))
                 posts = posts.Where(x => x.Category.Slug == slug);
-
-            return View(posts.ToList());
+            int totalItems = posts.Count();
+            int totalPages = (int)Math.Ceiling((decimal)totalItems / POSTS_PER_PAGE);
+        
+            posts = posts.OrderByDescending(x=> x.CreatedTime).Skip((page - 1) * POSTS_PER_PAGE).Take(POSTS_PER_PAGE);
+            var vm = new HomeViewModel()
+            {
+                Posts = posts.ToList(),
+                PaginationInfo = new PaginationViewModel()
+                {
+                    CurrentPage = page,
+                    HasNewer = page>1,
+                    HasOlder = page<totalPages,
+                    ItemsOnPage = posts.Count(),
+                    TotalItems = totalItems,
+                    TotalPages = totalPages
+                }
+           
+            };
+            return View(vm);
         }
 
         [Route("p/{slug}")]
         public IActionResult ShowPost(string slug)
         {
-            return View(_context.Posts.Include(x=>x.Category).FirstOrDefault(x=>x.Slug==slug));
+            return View(_context.Posts.Include(x => x.Category).FirstOrDefault(x => x.Slug == slug));
         }
         public IActionResult Privacy()
         {

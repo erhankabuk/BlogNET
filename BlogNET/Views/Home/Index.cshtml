@@ -1,33 +1,46 @@
-﻿@model List<Post>
+﻿@model HomeViewModel
 @{
     ViewData["Title"] = "Home Page";
 }
 
-@foreach(Post post in Model)
+@foreach (Post post in Model.Posts)
 {
-<!-- Blog post-->
-<div class="card mb-4">
-    <a href="#!"><img class="card-img-top" src="~/uploads/@post.PhotoPath" alt="@post.Title" /></a>
-    <div class="card-body">
-        <div class="small text-muted">@post.CreatedTime</div>
-        <h2 class="card-title">@post.Title</h2>
-        @Html.Raw(post.Content)
-        <a class="btn btn-primary" asp-controller="Home" asp-action="ShowPost" asp-route-slug="@post.Slug">Read more →</a>
+    <!-- Blog post-->
+    <div class="card mb-4">
+        <a href="#!"><img class="card-img-top" src="~/uploads/@post.PhotoPath" alt="@post.Title" /></a>
+        <div class="card-body">
+            <div class="small text-muted">@post.CreatedTime</div>
+            <h2 class="card-title">@post.Title</h2>
+            @Html.Raw(post.Content)
+            <a class="btn btn-primary" asp-controller="Home" asp-action="ShowPost" asp-route-slug="@post.Slug">Read more →</a>
+        </div>
     </div>
-</div>
 }
 
 
 <!-- Pagination-->
+@{ var pi = Model.PaginationInfo;}
 <nav aria-label="Pagination">
     <hr class="my-0" />
     <ul class="pagination justify-content-center my-4">
-        <li class="page-item disabled"><a class="page-link" href="#" tabindex="-1" aria-disabled="true">Newer</a></li>
-        <li class="page-item active" aria-current="page"><a class="page-link" href="#!">1</a></li>
-        <li class="page-item"><a class="page-link" href="#!">2</a></li>
-        <li class="page-item"><a class="page-link" href="#!">3</a></li>
-        <li class="page-item disabled"><a class="page-link" href="#!">...</a></li>
-        <li class="page-item"><a class="page-link" href="#!">15</a></li>
-        <li class="page-item"><a class="page-link" href="#!">Older</a></li>
+
+        <li class="page-item @(pi.HasNewer?"":"disabled")">
+            <a class="page-link" asp-route-page="@(pi.CurrentPage-1)" tabindex="-1">Newer</a>
+        </li>
+
+
+        @for (int i = 1; i <= pi.TotalPages; i++)
+        {
+            <li class="page-item @(pi.CurrentPage==i?"active":"")">
+                <a class="page-link " asp-route-page="@i">@i</a>
+            </li>
+        }
+
+
+
+
+        <li class="page-item @(pi.HasOlder?"":"disabled")">
+            <a class="page-link" asp-route-page="@(pi.CurrentPage+1)">Older</a>
+        </li>
     </ul>
 </nav>
