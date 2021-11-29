@@ -19,20 +19,29 @@
 
 
 <!-- Pagination-->
-@{ var pi = Model.PaginationInfo;}
+@{ var pi = Model.PaginationInfo;
+    var slug = ViewBag.Slug;
+}
 <nav aria-label="Pagination">
     <hr class="my-0" />
-    <ul class="pagination justify-content-center my-4">
+    <ul class="pagination justify-content-center mt-4">
 
         <li class="page-item @(pi.HasNewer?"":"disabled")">
-            <a class="page-link" asp-route-page="@(pi.CurrentPage-1)" tabindex="-1">Newer</a>
+            <a class="page-link" asp-route-pn="@(pi.CurrentPage-1)" asp-route-slug="@slug">Newer</a>
         </li>
 
 
-        @for (int i = 1; i <= pi.TotalPages; i++)
+        @foreach (int i in pi.PageNumbers())
         {
-            <li class="page-item @(pi.CurrentPage==i?"active":"")">
-                <a class="page-link " asp-route-page="@i">@i</a>
+            <li class="page-item @(pi.CurrentPage==i?"active":"") @(i==-1?"disabled":"")">
+                @if (i != -1)
+                {
+                    <a class="page-link " asp-route-pn="@i" asp-route-slug="@slug">@i</a>
+                }
+                else
+                {
+                    <a class="page-link" href="#">...</a>
+                }
             </li>
         }
 
@@ -40,7 +49,10 @@
 
 
         <li class="page-item @(pi.HasOlder?"":"disabled")">
-            <a class="page-link" asp-route-page="@(pi.CurrentPage+1)">Older</a>
+            <a class="page-link" asp-route-pn="@(pi.CurrentPage+1)" asp-route-slug="@slug">Older</a>
         </li>
-    </ul>
+    </ul>    
+    <p class="text-center mb-4 mt-1 small text-muted">
+    Displaying @pi.ResultsStart - @pi.ResultsEnd of @pi.TotalItems posts
+    </p>
 </nav>

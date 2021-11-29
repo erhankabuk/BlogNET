@@ -23,30 +23,35 @@ namespace BlogNET.Controllers
             _context = context;
         }
 
-        [Route("")]
         [Route("c/{slug}")]
-        public IActionResult Index(string slug, int page = 1)
+        [Route("")]
+        public IActionResult Index(string slug, int pn = 1)
         {
+            ViewBag.Slug = slug;
             IQueryable<Post> posts = _context.Posts;
             if (!string.IsNullOrEmpty(slug))
                 posts = posts.Where(x => x.Category.Slug == slug);
             int totalItems = posts.Count();
             int totalPages = (int)Math.Ceiling((decimal)totalItems / POSTS_PER_PAGE);
-        
-            posts = posts.OrderByDescending(x=> x.CreatedTime).Skip((page - 1) * POSTS_PER_PAGE).Take(POSTS_PER_PAGE);
+
+            posts = posts.OrderByDescending(x => x.CreatedTime).Skip((pn - 1) * POSTS_PER_PAGE).Take(POSTS_PER_PAGE);
+            var postsList = posts.ToList();
             var vm = new HomeViewModel()
             {
                 Posts = posts.ToList(),
                 PaginationInfo = new PaginationViewModel()
                 {
-                    CurrentPage = page,
-                    HasNewer = page>1,
-                    HasOlder = page<totalPages,
-                    ItemsOnPage = posts.Count(),
+                    CurrentPage = pn,
+                    HasNewer = pn > 1,
+                    HasOlder = pn < totalPages,
+                    ItemsOnPage = postsList.Count(),
                     TotalItems = totalItems,
-                    TotalPages = totalPages
+                    TotalPages = totalPages,
+                    ItemsPerPage= POSTS_PER_PAGE,
+                    ResultsStart= (pn-1)*POSTS_PER_PAGE+1,
+                    ResultsEnd=(pn-1)*POSTS_PER_PAGE+ postsList.Count()
                 }
-           
+
             };
             return View(vm);
         }
