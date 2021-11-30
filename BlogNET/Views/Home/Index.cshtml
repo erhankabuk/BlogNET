@@ -3,6 +3,16 @@
     ViewData["Title"] = "Home Page";
 }
 
+@if (Model.Category != null)
+{
+    <h1>Posts in the Category <em> &quot;@Model.Category.Name&quot;</em></h1>
+}
+
+@if (Model.SearchCriteria != null)
+{
+    <h1>Search Results for the Keyword <em> &quot;@Model.SearchCriteria&quot;</em></h1>
+}
+
 @foreach (Post post in Model.Posts)
 {
     <!-- Blog post-->
@@ -17,26 +27,24 @@
     </div>
 }
 
-
 <!-- Pagination-->
 @{ var pi = Model.PaginationInfo;
     var slug = ViewBag.Slug;
+    var q = Model.SearchCriteria;
 }
 <nav aria-label="Pagination">
     <hr class="my-0" />
     <ul class="pagination justify-content-center mt-4">
 
         <li class="page-item @(pi.HasNewer?"":"disabled")">
-            <a class="page-link" asp-route-pn="@(pi.CurrentPage-1)" asp-route-slug="@slug">Newer</a>
+            <a class="page-link" asp-route-pn="@(pi.CurrentPage-1)" asp-route-slug="@slug" asp-route-q="@q">Newer</a>
         </li>
-
-
         @foreach (int i in pi.PageNumbers())
         {
             <li class="page-item @(pi.CurrentPage==i?"active":"") @(i==-1?"disabled":"")">
                 @if (i != -1)
                 {
-                    <a class="page-link " asp-route-pn="@i" asp-route-slug="@slug">@i</a>
+                    <a class="page-link " asp-route-pn="@i" asp-route-slug="@slug" asp-route-q="@q">@i</a>
                 }
                 else
                 {
@@ -44,15 +52,11 @@
                 }
             </li>
         }
-
-
-
-
         <li class="page-item @(pi.HasOlder?"":"disabled")">
-            <a class="page-link" asp-route-pn="@(pi.CurrentPage+1)" asp-route-slug="@slug">Older</a>
+            <a class="page-link" asp-route-pn="@(pi.CurrentPage+1)" asp-route-slug="@slug" asp-route-q="@q">Older</a>
         </li>
-    </ul>    
+    </ul>
     <p class="text-center mb-4 mt-1 small text-muted">
-    Displaying @pi.ResultsStart - @pi.ResultsEnd of @pi.TotalItems posts
+        Displaying @pi.ResultsStart - @pi.ResultsEnd of @pi.TotalItems posts
     </p>
 </nav>

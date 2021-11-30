@@ -1,10 +1,13 @@
 ﻿@model List<Category>
 
-    <div class="row">
-        @foreach(Category category in Model)
-            {
-                <div class="col-lg-6">
-                    <a asp-controller="Home" asp-action="Index" asp-route-slug="@category.Slug">@category.Name</a>
-                </div>
-            }
+<div class="row">
+    <div class="col-lg-6">
+        <a asp-controller="Home" asp-action="Index" asp-route-slug="">Home</a>
     </div>
+    @foreach (Category category in Model)
+    {
+        <div class="col-lg-6">
+            <a asp-controller="Home" asp-action="Index" asp-route-slug="@category.Slug">@category.Name</a>
+        </div>
+    }
+</div>
