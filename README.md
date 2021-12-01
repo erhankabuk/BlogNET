@@ -13,5 +13,5 @@
 
 * https://github.com/dotnet-architecture/eShopOnWeb
 * https://picsum.photos/id/237/200/300
-
+* https://getbootstrap.com/docs/4.6/components/modal/
 
