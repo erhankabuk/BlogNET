@@ -1,0 +1,81 @@
+﻿@model NewPostViewModel
+@{
+    ViewData["Title"] = "New Post";
+}
+
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Create a New Post</h3>
+    </div>
+    <form method="post">
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="Title">Title</label>
+                <input asp-for="Title" type="text" class="form-control" />
+                <span asp-validation-for="Title"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Slug">Short URL</label>
+                <input asp-for="Slug" type="text" class="form-control" />
+                <span asp-validation-for="Slug"></span>
+
+            </div>
+            <div class="form-group">
+                <label>Content</label>
+                <textarea rows="4" class="form-control"></textarea>
+                <span asp-validation-for="Content"></span>
+            </div>
+            <div class="form-group">
+                <label for="FeaturedImage">Featured Image</label>
+                <div class="input-group">
+                    <div class="custom-file">
+                        <input asp-for="FeaturedImage" type="file" class="custom-file-input">
+                        <label asp-for="FeaturedImage" class="custom-file-label">Choose file</label>
+                    </div>
+                </div>
+                <span asp-validation-for="FeaturedImage"></span>
+
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryId">Category</label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-control">
+                    <option value="">Select one</option>
+                </select>
+                <span asp-validation-for="CategoryId"></span>
+
+            </div>
+            <div class="form-check">
+                <input asp-for="IsPublished" type="checkbox" class="form-check-input" checked />
+                <label asp-for="IsPublished" class="form-check-label">Published</label>
+                <span asp-validation-for="IsPublished"></span>
+
+            </div>
+        </div>
+        <div class="card-footer">
+            <button class="btn btn-primary float-right" type="submit">Save</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        bsCustomFileInput.init();
+        $("textarea").summernote();
+
+        $("#Title").blur(function () {
+            if ($("#Slug").val() != "") return;
+            var title = $(this).val();
+
+            $.ajax({
+                type: "post",
+                url: "@Url.Action("GenerateSlug","Posts")",
+                data: { text: title },
+                success: function(data){
+                $("#Slug").val(data);
+            }
+
+            });
+
+        });
+    </script>
+}

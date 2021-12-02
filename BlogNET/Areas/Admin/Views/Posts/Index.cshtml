@@ -1,6 +1,8 @@
 ﻿@model List<Post>
 
-@{ ViewData["Title"] = "Posts";}
+@{ ViewData["Title"] = "Posts";
+   
+    }
 
 
 <div class="card">
@@ -77,6 +79,11 @@
 
 @section Scripts{
     <script>
+        @{ var message = Context.Request.Query["message"];}
+        @if (message.Count> 0)
+            {
+           <text>toastr.success("Post deleted succesfully");</text>
+        }
         $("#tblPosts").DataTable({
             responsive: true,
             autoWidth: false
@@ -90,6 +97,8 @@
             modal.find("#modalPostId").val(id);
             modal.find("#modalPostTitle").text(title);
         });
+
+      
     </script>
 }
 
