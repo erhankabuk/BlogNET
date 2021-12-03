@@ -7,16 +7,11 @@ using System.Threading.Tasks;
 namespace BlogNET.Areas.Admin.Services
 {
 
-//https://stackoverflow.com/questions/25259/how-does-stack-overflow-generate-its-seo-friendly-urls/25486
-//https://meta.stackexchange.com/questions/7435/non-us|-ascii-characters-dropped-from-full-profile-url/7696#7696
-  
+    //https://stackoverflow.com/questions/25259/how-does-stack-overflow-generate-its-seo-friendly-urls/25486
+    //https://meta.stackexchange.com/questions/7435/non-us|-ascii-characters-dropped-from-full-profile-url/7696#7696
+
     public class UrlServices
     {
-        /// <summary>
-        /// Produces optional, URL-friendly version of a title, "like-this-one". 
-        /// hand-tuned for speed, reflects performance refactoring contributed
-        /// by John Gietzen (user otac0n) 
-        /// </summary>
         public string URLFriendly(string title)
         {
             if (title == null) return "";

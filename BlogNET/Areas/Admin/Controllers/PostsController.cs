@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlogNET.Areas.Admin.Controllers
@@ -18,12 +19,14 @@ namespace BlogNET.Areas.Admin.Controllers
         private readonly ApplicationDbContext _db;
         private readonly IWebHostEnvironment _env;
         private readonly UrlServices _urlService;
+        private readonly PhotoService _photoService;
 
-        public PostsController(ApplicationDbContext db, IWebHostEnvironment env, UrlServices urlService)
+        public PostsController(ApplicationDbContext db, IWebHostEnvironment env, UrlServices urlService ,PhotoService photoService)
         {
             _db = db;
             _env = env;
             _urlService = urlService;
+            _photoService = photoService;
         }
         public IActionResult Index()
         {
@@ -39,28 +42,13 @@ namespace BlogNET.Areas.Admin.Controllers
             if (post == null)
             {
                 return NotFound();
-            }
-            DeletePhoto(post.PhotoPath);
+            }            
+            _photoService.DeletePhoto(post.PhotoPath);
             _db.Posts.Remove(post);
             _db.SaveChanges();
             return RedirectToAction("Index", new { message = "delete" });
         }
-
-        private void DeletePhoto(string photoPath)
-        {
-            if (string.IsNullOrEmpty(photoPath))
-            {
-                return;
-            }
-
-            try
-            {
-                var deletePath = Path.Combine(_env.WebRootPath, "uploads", photoPath);
-                System.IO.File.Delete(deletePath);
-            }
-            catch (Exception) { }
-        }
-
+       
         public IActionResult New()
         {
             var vm = new NewPostViewModel()
@@ -69,16 +57,28 @@ namespace BlogNET.Areas.Admin.Controllers
             };
             return View(vm);
         }
-       [HttpPost,ValidateAntiForgeryToken]
-       public IActionResult New(NewPostViewModel vm)
-       {
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult New(NewPostViewModel vm)
+        {
             if (ModelState.IsValid)
             {
-                //save data
+                Post post = new Post()
+                {
+                    AuthorId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                    CategoryId = vm.CategoryId.Value,
+                    Content = vm.Content,
+                    Title = vm.Title,
+                    Slug = _urlService.URLFriendly(vm.Slug),
+                    PhotoPath =_photoService.SavePhoto(vm.FeaturedImage),
+                    isPublished=vm.IsPublished
+                };
+                _db.Add(post);
+                _db.SaveChanges();
+                return RedirectToAction(nameof(Index));
             }
             vm.Categories = _db.Categories.OrderBy(x => x.Name).Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
-           return View(vm);
-       }
+            return View(vm);
+        }
         [HttpPost]
         public IActionResult GenerateSlug(string text)
         {
