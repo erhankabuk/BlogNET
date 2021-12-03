@@ -1,13 +1,14 @@
-﻿@model NewPostViewModel
+﻿@model EditPostViewModel
 @{
-    ViewData["Title"] = "New Post";
+    ViewData["Title"] = "Edit Post";
 }
 
 <div class="card card-primary">
     <div class="card-header">
-        <h3 class="card-title">Create a New Post</h3>
+        <h3 class="card-title">Edit Post</h3>
     </div>
     <form method="post" enctype="multipart/form-data">
+        <input asp-for="Id" type="hidden" />
         <div class="card-body">
             <div class="form-group">
                 <label asp-for="Title">Title</label>

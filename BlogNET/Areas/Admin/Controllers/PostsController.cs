@@ -21,7 +21,7 @@ namespace BlogNET.Areas.Admin.Controllers
         private readonly UrlServices _urlService;
         private readonly PhotoService _photoService;
 
-        public PostsController(ApplicationDbContext db, IWebHostEnvironment env, UrlServices urlService ,PhotoService photoService)
+        public PostsController(ApplicationDbContext db, IWebHostEnvironment env, UrlServices urlService, PhotoService photoService)
         {
             _db = db;
             _env = env;
@@ -42,13 +42,13 @@ namespace BlogNET.Areas.Admin.Controllers
             if (post == null)
             {
                 return NotFound();
-            }            
+            }
             _photoService.DeletePhoto(post.PhotoPath);
             _db.Posts.Remove(post);
             _db.SaveChanges();
             return RedirectToAction("Index", new { message = "delete" });
         }
-       
+
         public IActionResult New()
         {
             var vm = new NewPostViewModel()
@@ -69,11 +69,50 @@ namespace BlogNET.Areas.Admin.Controllers
                     Content = vm.Content,
                     Title = vm.Title,
                     Slug = _urlService.URLFriendly(vm.Slug),
-                    PhotoPath =_photoService.SavePhoto(vm.FeaturedImage),
-                    isPublished=vm.IsPublished
+                    PhotoPath = _photoService.SavePhoto(vm.FeaturedImage),
+                    isPublished = vm.IsPublished
                 };
                 _db.Add(post);
                 _db.SaveChanges();
+                return RedirectToAction(nameof(Index));
+            }
+            vm.Categories = _db.Categories.OrderBy(x => x.Name).Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
+            return View(vm);
+        }
+        public IActionResult Edit(int id)
+        {
+            Post post = _db.Posts.Find(id);
+            if (post == null) return NotFound();
+
+            var vm = new EditPostViewModel()
+            {
+                Id = post.Id,
+                CategoryId = post.CategoryId,
+                Content = post.Content,
+                Title = post.Title,
+                Categories = _db.Categories.OrderBy(x => x.Name).Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList(),
+                IsPublished = post.isPublished
+            };
+
+            return View(vm);
+        }
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult Edit(EditPostViewModel vm)
+        {
+            if (ModelState.IsValid)
+            {
+                Post post = _db.Posts.Find(vm.Id);
+                if (post == null) return NotFound();
+                post.CategoryId = vm.CategoryId.Value;
+                post.Content = vm.Content;
+                post.Title = vm.Title;
+                post.Slug = _urlService.URLFriendly(vm.Slug);
+                if(vm.FeaturedImage!=null)
+                post.PhotoPath = _photoService.SavePhoto(vm.FeaturedImage);
+                post.isPublished = vm.IsPublished;
+                post.ModifiedTime = DateTime.Now;                               
+                _db.SaveChanges();
+
                 return RedirectToAction(nameof(Index));
             }
             vm.Categories = _db.Categories.OrderBy(x => x.Name).Select(x => new SelectListItem(x.Name, x.Id.ToString())).ToList();
@@ -86,6 +125,8 @@ namespace BlogNET.Areas.Admin.Controllers
             return Content(slug);
 
         }
+
+
 
 
 
