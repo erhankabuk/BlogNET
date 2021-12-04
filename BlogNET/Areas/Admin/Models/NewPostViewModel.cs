@@ -9,9 +9,8 @@ using System.Threading.Tasks;
 
 namespace BlogNET.Areas.Admin.Models
 {
-    public class EditPostViewModel
-    {
-        public int Id { get; set; }
+    public class NewPostViewModel
+    {       
         [Required]
         public string Title { get; set; }
         [Required]

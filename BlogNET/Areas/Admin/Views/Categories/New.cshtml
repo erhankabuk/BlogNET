@@ -1,0 +1,55 @@
+﻿@model NewCategoryViewModel
+@{
+    ViewData["Title"] = "New Category";
+}
+
+
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Create a New Category</h3>
+    </div>
+    <form method="post" enctype="multipart/form-data">
+        <div class="card-body">
+            <div class="form-group">
+                <label asp-for="Name">Name</label>
+                <input asp-for="Name" type="text" class="form-control" />
+                <span asp-validation-for="Name"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Slug">Short URL</label>
+                <input asp-for="Slug" type="text" class="form-control" />
+                <span asp-validation-for="Slug"></span>
+            </div>
+        </div>
+        <div class="card-footer float-right">
+            <button class="btn btn-primary " type="submit">Save</button>
+            <button class="btn btn-primary " asp-controller="Categories" asp-action="Index" type="submit">Cancel</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        @{ var message = Context.Request.Query["message"];}
+        @if (message.Count> 0)
+            {
+           <text>toastr.error("This category already existed.");</text>
+            }
+
+        $("#Name").blur(function () {
+                if ($("#Slug").val() != "") return;
+            var name = $(this).val();
+
+            $.ajax({
+            type: "post",
+                url: "@Url.Action("GenerateSlug","Categories")",
+                data: { text: name },
+                success: function(data){
+                $("#Slug").val(data);
+                }
+
+            });
+
+        });
+    </script>
+}

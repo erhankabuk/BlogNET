@@ -4,18 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace BlogNET.Data
+namespace BlogNET.Areas.Admin.Models
 {
-    public class Category
+    public class EditCategoryViewModel
     {
         public int Id { get; set; }
-
-        [Required, MaxLength(100)]
-        public string Name { get; set; } 
-        [Required, MaxLength(100)]
+        [Required]
+        public string Name { get; set; }
+        [Required]
         public string Slug { get; set; }
-
-        public ICollection<Post> Posts { get; set; }
-
     }
 }

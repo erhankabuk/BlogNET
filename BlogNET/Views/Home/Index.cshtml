@@ -21,8 +21,19 @@
         <div class="card-body">
             <div class="small text-muted">@post.CreatedTime</div>
             <h2 class="card-title">@post.Title</h2>
-            @Html.Raw(post.Content)
-            <a class="btn btn-primary" asp-controller="Home" asp-action="ShowPost" asp-route-slug="@post.Slug">Read more →</a>
+            @* @Html.Raw(post.Content)*@
+            @{
+                if (post.Content.ToString().Length > 302)
+                {
+                    @Html.Raw(post.Content.Substring(0, 300).ToString() + "...");
+                }
+                else
+                {
+                    @Html.Raw(post.Content);
+                }
+            }
+        <br />           
+            <a class="btn btn-primary mt-3" asp-controller="Home" asp-action="ShowPost" asp-route-slug="@post.Slug">Read more →</a>
         </div>
     </div>
 }
@@ -60,3 +71,4 @@
         Displaying @pi.ResultsStart - @pi.ResultsEnd of @pi.TotalItems posts
     </p>
 </nav>
+
