@@ -1,5 +1,6 @@
 ﻿using BlogNET.Data;
 using BlogNET.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -7,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlogNET.Controllers
@@ -25,10 +27,10 @@ namespace BlogNET.Controllers
 
         [Route("c/{slug}")]
         [Route("")]
-        public IActionResult Index(string slug, string q , int pn = 1 )
+        public IActionResult Index(string slug, string q, int pn = 1)
         {
             ViewBag.Slug = slug;
-            IQueryable<Post> posts = _context.Posts.Where(x=>x.isPublished);
+            IQueryable<Post> posts = _context.Posts.Where(x => x.isPublished);
             Category category = null;
 
             if (!string.IsNullOrEmpty(q))
@@ -72,7 +74,14 @@ namespace BlogNET.Controllers
         [Route("p/{slug}")]
         public IActionResult ShowPost(string slug)
         {
-            return View(_context.Posts.Include(x => x.Category).FirstOrDefault(x => x.Slug == slug));
+            return View(_context.Posts
+                .Include(x => x.Category)
+                .Include(x => x.Comments)
+                    .ThenInclude(x => x.Author)
+                .Include(x => x.Comments)
+                    .ThenInclude(x => x.Children)
+                        .ThenInclude(x => x.Author)
+                .FirstOrDefault(x => x.Slug == slug));
         }
         public IActionResult Privacy()
         {
@@ -84,5 +93,26 @@ namespace BlogNET.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
+        [Authorize, HttpPost]
+        public IActionResult Comment(int postId, string content, string slug, int? parentId)
+        {
+            content = content.Trim();
+            if (content == "") return BadRequest();
+
+            _context.Add(new Comment()
+            {
+                AuthorId = User.FindFirstValue(ClaimTypes.NameIdentifier),
+                CreatedTime = DateTime.Now,
+                ParentId = parentId,
+                PostId = postId,
+                Content = content,
+                IsPublished = true
+            });
+            _context.SaveChanges();
+            return RedirectToAction("ShowPost", new { slug, message = "received" });
+        }
+
+
+
     }
 }
