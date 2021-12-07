@@ -1,8 +1,7 @@
 ﻿@model Post
-
-@{ ViewData["Title"] = Model.Title;}
-
-
+@{
+    ViewData["Title"] = Model.Title;
+}
 <!-- Post content-->
 <article>
     <!-- Post header-->
@@ -13,7 +12,6 @@
         <div class="text-muted fst-italic mb-2">Posted on @Model.CreatedTime</div>
         <!-- Post categories-->
         <a class="badge bg-secondary text-decoration-none link-light" asp-controller="Home" asp-action="Index" asp-route-slug="@Model.Category.Slug">@Model.Category.Name</a>
-
     </header>
     <!-- Preview image figure-->
     <figure class="mb-4"><img class="w-100 rounded" src="~/uploads/@Model.PhotoPath" alt="@Model.Title" /></figure>
@@ -23,44 +21,62 @@
     </section>
 </article>
 <!-- Comments section-->
-<section class="mb-5">
+<section class="mb-5" id="comments">
     <div class="card bg-light">
         <div class="card-body">
+            @if (Context.Request.Query["message"] == "received")
+            {
+                <div class="alert alert-success">
+                    Your comment has been received succesfully.
+                </div>
+            }
             <!-- Comment form-->
             @if (!User.Identity.IsAuthenticated)
             {
-                <div class="alert alert-warning text-center ">
-                    Please <a asp-area="Identity" asp-page="/Account/Login" class="link-warning">login</a> or <a class="link-warning" asp-area="Identity" asp-page="/Account/Register">register</a> to post a comment!
+                <div class="alert alert-warning text-center">
+                    Please <a asp-area="Identity" asp-page="/Account/Login" asp-route-ReturnUrl="@Context.Request.Path" class="link-dark">login</a> or <a asp-area="Identity" asp-page="/Account/Register" asp-route-ReturnUrl="@Context.Request.Path" class="link-dark">register</a> to post a comment!
                 </div>
             }
             else
             {
-
+                <div id="replying-to-box" class="d-none border bg-white text-secondary p-2 mb-2 fst-italic">
+                    <i class="fas fa-reply"></i>
+                    Replying to <span id="reply-to"></span>
+                    <a id="cancel-replying" href="#" class="float-end btn-close"></a>
+                </div>
                 <form id="frmComment" asp-controller="Home" asp-action="Comment" class="row mb-4 align-items-end" method="post">
                     <input type="hidden" name="PostId" value="@Model.Id" />
                     <input type="hidden" name="Slug" value="@Model.Slug" />
-                    <input type="hidden" name="ParentId" value="" />
+                    <input type="hidden" id="ParentId" name="ParentId" value="" />
                     <div class="col">
-                        <textarea name="content" class="form-control" rows="3" placeholder="Leave a comment!" required></textarea>
+                        <textarea id="commentContent" name="content" class="form-control" rows="3" placeholder="Leave a comment!"></textarea>
                     </div>
                     <div class="col-auto ps-0">
                         <button class="btn btn-primary">Submit</button>
                     </div>
                 </form>
-            }
 
-            <!-- Comment with nested comments-->
-            @foreach (Comment comment in Model.Comments)
+            }
+            @foreach (Comment comment in Model.Comments.Where(x => x.ParentId == null))
             {
+                <!-- Comment with nested comments-->
                 <div class="d-flex mb-4">
                     <!-- Parent comment-->
                     <div class="flex-shrink-0">
                         <img class="rounded-circle" src="https://dummyimage.com/50x50/ced4da/6c757d.jpg" alt="..." />
                     </div>
                     <div class="ms-3 flex-grow-1">
-                        <div class="fw-bold">@Model.Author.UserName</div>
+                        <div class="fw-bold">@BeforeAt(comment.Author.UserName)</div>
                         @comment.Content
-                    <a href="#" data-reply-id="@comment.Id">Reply</a>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <a href="#comments" data-reply-id="@comment.Id" data-reply-to="@BeforeAt(comment.Author.UserName)">Reply</a>
+                        }
+                        else
+                        {
+                            <a tabindex="0" class="c-pointer" data-reply-id="@comment.Id" data-reply-to="@BeforeAt(comment.Author.UserName)" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="Please login or register to post a comment.">Reply</a>
+                        }
+
                         @foreach (Comment subcomment in comment.Children)
                         {
                             <!-- Child comment-->
@@ -80,16 +96,37 @@
 </section>
 
 @{
-    string BeforeAt( string email)
+    string BeforeAt(string email)
     {
         int indexOfAt = email.IndexOf("@");
         return email.Substring(0, indexOfAt);
-
     }
-
-
-
 }
 
+@section Scripts {
+    <script>
+        $("[data-reply-id]").click(function () {
+            var replyId = $(this).data("reply-id");
+            var replyTo = $(this).data("reply-to");
+            $("#reply-to").text("@@" + replyTo);
+            $("#ParentId").val(replyId);
+            $("#replying-to-box").removeClass("d-none");
+        });
 
+        $("#cancel-replying").click(function (event) {
+            event.preventDefault();
+            $("#replying-to-box").addClass("d-none");
+            $("#reply-to").text("");
+            $("#ParentId").val("");
+        });
 
+        var commentContent = document.getElementById("commentContent");
+
+        if (commentContent) {
+            commentContent.oninput = function () {
+                var content = commentContent.value.trim();
+                commentContent.setCustomValidity(content ? "" : "Please fill this area.");
+            };
+        }
+    </script>
+} 

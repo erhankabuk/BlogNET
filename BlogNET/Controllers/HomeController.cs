@@ -93,11 +93,11 @@ namespace BlogNET.Controllers
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
-        [Authorize, HttpPost]
+        [Authorize, HttpPost, ValidateAntiForgeryToken]
         public IActionResult Comment(int postId, string content, string slug, int? parentId)
         {
-            content = content.Trim();
-            if (content == "") return BadRequest();
+            
+            if (string.IsNullOrWhiteSpace(content)) return BadRequest();
 
             _context.Add(new Comment()
             {
@@ -109,7 +109,8 @@ namespace BlogNET.Controllers
                 IsPublished = true
             });
             _context.SaveChanges();
-            return RedirectToAction("ShowPost", new { slug, message = "received" });
+            string url = Url.Action("ShowPost", new { slug, message = "received" }) +"#comments";
+            return Redirect(url);
         }
 
 

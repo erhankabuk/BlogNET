@@ -23,7 +23,8 @@ namespace BlogNET.Areas.Admin.Controllers
             {
                 CategoryCount = _db.Categories.Count(),
                 PostCount = _db.Posts.Count(),
-                UserCount = _db.Users.Count()
+                UserCount = _db.Users.Count(),
+                CommentCount= _db.Comments.Count()
             };
             return View(vm);
         }
