@@ -1,103 +1,101 @@
 ﻿@model List<Comment>
 @{
     ViewData["Title"] = "Comments";
+}
 
-
-    <div class="card">
-
-        <div class="card-body">
-            <table id="tblPosts" class="table table-bordered table-hover">
-                <thead>
+<div class="card">
+    <div class="card-body">
+        <table id="tblComments" class="table table-bordered table-hover">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Author</th>
+                    <th>Content</th>
+                    <th>Time</th>
+                    <th>Published</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Comment comment in Model)
+                {
                     <tr>
-                        <th>Id</th>
-                        <th>Author</th>
-                        <th>Content</th>
-                        <th>Time</th>
-                        <th>Published</th>
-                        <th></th>
+                        <td>@comment.Id</td>
+                        <td>@comment.Author.UserName</td>
+                        <td>@comment.Content</td>
+                        <td>@comment.CreatedTime</td>
+                        <td>
+                            <input type="checkbox" data-publish-id="@comment.Id" checked="@comment.IsPublished" />
+                        </td>
+                        <td class="text-center">
+                            <a asp-controller="Comments" asp-action="Edit" asp-route-id="@comment.Id" class="btn btn-info btn-sm">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="#" data-delete-id="@comment.Id" data-title="@comment.Id" data-toggle="modal" data-target="#deleteModal" class="btn btn-danger btn-sm ml-1">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
                     </tr>
-                </thead>
-
-                <tbody>
-                    @foreach (Comment comment in Model)
-                    {
-                        <tr>
-                            <td>@comment.Id</td>
-                           
-                            <td>@comment.Author.UserName</td>
-                            <td>@comment.Content</td>
-                            <td>@comment.CreatedTime</td>
-                            <td>@comment.IsPublished</td>
-                            <td class="text-center">
-                                <a asp-controller="Comments" asp-action="Edit" asp-route-id="@comment.Id" class=" btn btn-info btn-sm">
-                                    <i class="fas fa-edit"></i>
-                                </a>
-                                <a href="#" data-delete-id="@comment.Id" data-title="@comment.Id" data-toggle="modal" data-target="#deleteModal" class="btn btn-danger btn-sm ml-1">
-                                    <i class="fas fa-trash"></i>
-                                </a>
-
-
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-
-        </div>
-
+                }
+            </tbody>
+        </table>
     </div>
-    <form asp-controller="Comments" asp-action="Delete" method="post">
+</div>
 
-        <!-- Modal -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Delete Confirmation</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <div class="modal-body">
-                        Are you sure you want to delete this comment with id &quot; <span id="modalCommandTitle"></span> &quot; ?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <input id="modalModalId" type="hidden" name="id" value="" />
-                        <button type="submit" class="btn btn-danger">Yes, Delete</button>
-                    </div>
+<form asp-controller="Comments" asp-action="Delete" method="post">
+    <!-- Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Delete Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete the comment with the id &quot;<span id="modalCommentTitle"></span>&quot;?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <input id="modalCommentId" type="hidden" name="id" value="" />
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+</form>
 
+@section Scripts {
+    <script>
+        $("[data-publish-id]").change(function (event) {
+            var status = $(this).prop("checked");
+            var id = $(this).data("publish-id");
+            var dataSent = { commentId: id, isPublished: status };
 
+            $.post("@Url.Action("SetStatus", "Comments")", dataSent, function () {
+                toastr.success("The comment status has been updated.")
+            });
+        });
 
-
-    @section Scripts{
-        <script>
-        @{ var message = Context.Request.Query["message"];}
-        @if (message.Count> 0)
-            {
-           <text>toastr.success("Comment has been deleted succesfully");</text>
+        @{ var message = Context.Request.Query["message"]; }
+        @if (Context.Request.Query["message"].Count > 0)
+        {
+            <text>toastr.success("The comment has been deleted successfully.");</text>
         }
+
         $("#tblComments").DataTable({
+            autoWidth: false,
             responsive: true,
-            autoWidth: false
         });
 
         $("#deleteModal").on("show.bs.modal", function (event) {
             var btn = $(event.relatedTarget);
             var modal = $(this);
             var id = btn.data("delete-id");
-            var title = btn.data("Title");
+            var title = btn.data("title");
             modal.find("#modalCommentId").val(id);
             modal.find("#modalCommentTitle").text(title);
         });
-
-
-        </script>
-    }
-
-
+    </script>
 }

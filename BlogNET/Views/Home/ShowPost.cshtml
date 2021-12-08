@@ -57,7 +57,7 @@
                 </form>
 
             }
-            @foreach (Comment comment in Model.Comments.Where(x => x.ParentId == null))
+            @foreach (Comment comment in Model.Comments.Where(x => x.ParentId == null && x.IsPublished))
             {
                 <!-- Comment with nested comments-->
                 <div class="d-flex mb-4">
@@ -77,7 +77,7 @@
                             <a tabindex="0" class="c-pointer" data-reply-id="@comment.Id" data-reply-to="@BeforeAt(comment.Author.UserName)" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-content="Please login or register to post a comment.">Reply</a>
                         }
 
-                        @foreach (Comment subcomment in comment.Children)
+                        @foreach (Comment subcomment in comment.Children.Where(x=>x.IsPublished))
                         {
                             <!-- Child comment-->
                             <div class="d-flex mt-4">
